@@ -124,7 +124,7 @@ class OpenaiLlm(LLM):
                     user_input.lower().startswith("multion")):
                     response = await self.multion_agent.action(user_input)
                     context += response
-
+            print(context)
             # 2. Add user input to history
             history.append({'role':"user","content":user_input_template.format(
                 context=context, query=user_input)})

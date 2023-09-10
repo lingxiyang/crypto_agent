@@ -538,6 +538,31 @@ async def search_content(request: ChatRequest,
         user_input=request.user_input,
         user_input_template=user_input_template,
         character=character,
+        useSearch=True,
+        metadata={"message_id": message_id})
+    # print(response)
+    return StreamingResponse(response, media_type='text/event-stream')
+
+@router.post("/explore")
+async def explore(catalog_manager=Depends(get_catalog_manager), ):
+
+    character_id = "General"
+    message_id = str(uuid.uuid4().hex)[:16]
+    character = catalog_manager.get_character(character_id)
+    user_input_template = character.llm_user_prompt
+    llm_model = os.getenv('LLM_MODEL_USE', 'gpt-3.5-turbo-16k')
+    messages = []
+    messages.append({'role':"system","content": character.llm_system_prompt})
+    # if request.messages is not None:
+    #     messages.extend([message.dict() for message in request.messages])
+    # response = generate(messages,"gpt-4")
+    llm = get_llm(model=llm_model)
+    response = llm.achat_stream(
+        history=messages,
+        user_input="",
+        user_input_template=user_input_template,
+        character=character,
+        useSearch=True,
         metadata={"message_id": message_id})
     # print(response)
     return StreamingResponse(response, media_type='text/event-stream')
